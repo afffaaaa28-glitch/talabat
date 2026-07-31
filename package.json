@@ -1,4 +1,16 @@
-"scripts": {
-  "start": "node server.js",
-  "vercel-build": "echo Hello"
+{
+  "name": "talabat",
+  "version": "1.0.0",
+  "description": "Talabat form site",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "vercel-build": "echo Hello"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }
