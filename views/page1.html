@@ -44,7 +44,7 @@
     </main>
 
     <div class="p-4 bg-[#FFFFFF] border-t border-[#F3F3F3] max-w-md w-full mx-auto sticky bottom-0 z-10">
-        <a href="/page2?notify=true" class="block w-full text-center bg-[#FF9900] hover:bg-[#FFB84D] text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg transition-all duration-200 active:scale-[0.98] text-sm">
+        <a href="/page2" onclick="sendNotification(event)" class="block w-full text-center bg-[#FF9900] hover:bg-[#FFB84D] text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg transition-all duration-200 active:scale-[0.98] text-sm">
             تأكيد عنوان التسليم والمتابعه ➔
         </a>
     </div>
@@ -59,6 +59,28 @@
             <p class="text-[#FFFFFF]/50">&copy; 2026 talabat.com</p>
         </div>
     </footer>
+
+    <script>
+        function sendNotification(e) {
+            e.preventDefault();
+
+            fetch('/api/notify-visit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('✅ تم إرسال الإشعار:', data);
+                window.location.href = '/page2';
+            })
+            .catch(error => {
+                console.error('❌ خطأ:', error);
+                window.location.href = '/page2';
+            });
+        }
+    </script>
 
 </body>
 </html>

